@@ -111,17 +111,10 @@ void FeederClass::factoryReset() {
 
 
 void FeederClass::gotoPostPickPosition() {
-  if(this->feederPosition==sAT_FULL_ADVANCED_POSITION) {
-    this->gotoRetractPosition();
-    #ifdef DEBUG
-      Serial.println("gotoPostPickPosition retracted feeder");
-    #endif
-  } else {
-    #ifdef DEBUG
-      Serial.println("gotoPostPickPosition didn't need to retract feeder");
-    #endif
-
-  }
+  this->gotoRetractPosition();
+  #ifdef DEBUG
+    Serial.println("gotoPostPickPosition retracted feeder");
+  #endif
 }
 
 void FeederClass::gotoRetractPosition() {

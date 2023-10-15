@@ -258,6 +258,9 @@ void processCommand() {
 			//reattach servo with new settings
 			feeders[(uint8_t)signedFeederNo].setup();
 
+			//print all settings
+			executeCommandOnAllFeeder(cmdOutputCurrentSettings);
+
 			//confirm
 			sendAnswer(0,F("Feeders config updated."));
 
