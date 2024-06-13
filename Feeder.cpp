@@ -41,6 +41,8 @@ void FeederClass::outputCurrentSettings() {
 	Serial.print(this->feederSettings.motor_min_pulsewidth);
 	Serial.print(" W");
 	Serial.print(this->feederSettings.motor_max_pulsewidth);
+	Serial.print(" T");
+	Serial.print(this->feederSettings.feeder_type);
 #ifdef HAS_FEEDBACKLINES
 	Serial.print(" X");
 	Serial.print(this->feederSettings.ignore_feedback);
@@ -52,9 +54,20 @@ void FeederClass::setup() {
 	//load settings from eeprom
 	this->loadFeederSettings();
 
-	//attach servo to pin, after settings are loaded
-	this->servo.attach(feederPinMap[this->feederNo],this->feederSettings.motor_min_pulsewidth,this->feederSettings.motor_max_pulsewidth);
-
+	if (this->feederSettings.feeder_type == 0) {
+		//attach servo to pin, after settings are loaded
+		Serial.print("attach servo for feeder ");
+		Serial.println(feederNo);
+		
+		this->servo.attach(feederPinMap[this->feederNo],this->feederSettings.motor_min_pulsewidth,this->feederSettings.motor_max_pulsewidth);
+	} else if (this->feederSettings.feeder_type == 1) {
+		Serial.print("Set pin for Bing ");
+		Serial.println(feederNo);
+		pinMode(feederPinMap[this->feederNo], OUTPUT);
+		digitalWrite(feederPinMap[this->feederNo], HIGH);
+	} else {
+		
+	}
 	//feedback input
 	//microswitch is active low (NO connected to feedback-pin)
 #ifdef HAS_FEEDBACKLINES
@@ -105,7 +118,6 @@ void FeederClass::saveFeederSettings() {
 
 void FeederClass::factoryReset() {
 	//just save the defaults to eeprom...
-
 	this->saveFeederSettings();
 }
 
@@ -118,42 +130,49 @@ void FeederClass::gotoPostPickPosition() {
 }
 
 void FeederClass::gotoRetractPosition() {
-	this->servo.write(this->feederSettings.retract_angle);
-	this->feederPosition=sAT_RETRACT_POSITION;
-	this->feederState=sMOVING;
-	#ifdef DEBUG
-		Serial.println("going to retract now");
-	#endif
+	if (this->feederSettings.feeder_type==0) {
+		this->servo.write(this->feederSettings.retract_angle);
+		this->feederPosition=sAT_RETRACT_POSITION;
+		this->feederState=sMOVING;
+		#ifdef DEBUG
+			Serial.println("going to retract now");
+		#endif
+	}
 }
 
 void FeederClass::gotoHalfAdvancedPosition() {
-	this->servo.write(this->feederSettings.half_advanced_angle);
-	this->feederPosition=sAT_HALF_ADVANCED_POSITION;
-	this->feederState=sMOVING;
-	#ifdef DEBUG
-		Serial.println("going to half adv now");
-	#endif
+	if (this->feederSettings.feeder_type==0) {
+		this->servo.write(this->feederSettings.half_advanced_angle);
+		this->feederPosition=sAT_HALF_ADVANCED_POSITION;
+		this->feederState=sMOVING;
+		#ifdef DEBUG
+			Serial.println("going to half adv now");
+		#endif
+	}
 }
 
 void FeederClass::gotoFullAdvancedPosition() {
-	this->servo.write(this->feederSettings.full_advanced_angle);
-	this->feederPosition=sAT_FULL_ADVANCED_POSITION;
-	this->feederState=sMOVING;
-	#ifdef DEBUG
-		Serial.println("going to full adv now");
-	#endif
+	if (this->feederSettings.feeder_type==0) {
+		this->servo.write(this->feederSettings.full_advanced_angle);
+		this->feederPosition=sAT_FULL_ADVANCED_POSITION;
+		this->feederState=sMOVING;
+		#ifdef DEBUG
+			Serial.println("going to full adv now");
+		#endif
+	}
 }
 
 
 void FeederClass::gotoAngle(uint8_t angle) {
+	if (this->feederSettings.feeder_type==0) {
+		this->servo.write(angle);
 	
-	this->servo.write(angle);
-	
-	#ifdef DEBUG
-		Serial.print("going to ");
-		Serial.print(angle);
-		Serial.println("deg");
-	#endif
+		#ifdef DEBUG
+			Serial.print("going to ");
+			Serial.print(angle);
+			Serial.println("deg");
+		#endif
+	}
 }
 
 bool FeederClass::advance(uint8_t feedLength, bool overrideError = false) {
@@ -174,7 +193,7 @@ bool FeederClass::advance(uint8_t feedLength, bool overrideError = false) {
 	//check whether feeder is OK before every advance command
 	if( !this->feederIsOk() ) {
 		//feeder is in error state, usually this would lead to exit advance with false and no advancing cycle started
-		 
+
 		 if(!overrideError) {
 			//return with false means an error, that is not ignored/overridden
 			//error, and error was not overridden -> return false, advance not successful
@@ -186,7 +205,10 @@ bool FeederClass::advance(uint8_t feedLength, bool overrideError = false) {
 			 
 		 }
 	}
-
+	
+	//if (this->feeder_type == 1) {	// bing v2
+		// this->
+	
 	//check, what to do? if not, return quickly
 	if(feedLength==0) {
 		//nothing to do, just return
@@ -390,16 +412,26 @@ void FeederClass::update() {
 		switch (this->feederPosition) {
 			/* ------------------------------------- RETRACT POS ---------------------- */
 			case sAT_RETRACT_POSITION: {
-				if(this->remainingFeedLength>=FEEDER_MECHANICAL_ADVANCE_LENGTH) {
-					//goto full advance-pos
-					this->gotoFullAdvancedPosition();
-					this->remainingFeedLength-=FEEDER_MECHANICAL_ADVANCE_LENGTH;
-				} else if(this->remainingFeedLength>=FEEDER_MECHANICAL_ADVANCE_LENGTH/2) {
-					//goto half advance-pos
-					this->gotoHalfAdvancedPosition();
-					this->remainingFeedLength-=FEEDER_MECHANICAL_ADVANCE_LENGTH/2;
+				if (this->feederSettings.feeder_type == 0) {  // 0816 style feeder
+					if(this->remainingFeedLength>=FEEDER_MECHANICAL_ADVANCE_LENGTH) {
+						//goto full advance-pos
+						this->gotoFullAdvancedPosition();
+						this->remainingFeedLength-=FEEDER_MECHANICAL_ADVANCE_LENGTH;
+					} else if(this->remainingFeedLength>=FEEDER_MECHANICAL_ADVANCE_LENGTH/2) {
+						//goto half advance-pos
+						this->gotoHalfAdvancedPosition();
+						this->remainingFeedLength-=FEEDER_MECHANICAL_ADVANCE_LENGTH/2;
+					}
+				} else if (this->feederSettings.feeder_type == 1) {  // bing v2
+					// pulse, set settle time
+					digitalWrite(feederPinMap[this->feederNo], LOW);  // Motor control pin output high level                                               //Wait for 300ms
+					delay(10);
+					digitalWrite(feederPinMap[this->feederNo], HIGH);   // Motor control pin output low level 
+					this->feederPosition=sAT_RETRACT_POSITION;
+					this->feederState=sMOVING;
+				} else {
+				
 				}
-
 			}
 			break;
 

@@ -3,8 +3,8 @@
 */
 #define NUMBER_OF_FEEDER 24
 #define HAS_ENABLE_PIN
-#define HAS_FEEDBACKLINES
-#define HAS_ANALOG_IN
+//#define HAS_FEEDBACKLINES
+//#define HAS_ANALOG_IN
 #define HAS_POWER_OUTPUTS
 
 /*

@@ -8,7 +8,7 @@
 */
 // prints some extra information via serial
 // uncomment to disable in production
-//#define DEBUG
+#define DEBUG
 
 /*
 *  Select controller shield
@@ -117,13 +117,13 @@
 #define FEEDER_DEFAULT_MOTOR_MAX_PULSEWITH 2400		// [µs] see motor specs or experiment at bit. Value set here should bring the servo to 180°
 #define FEEDER_DEFAULT_IGNORE_FEEDBACK 0			// 0: before feeding the feedback-signal is checked. if signal is as expected, the feeder advances tape and returns OK to host. otherwise an error is thrown.
 													// 1: the feedback-signal is not checked, feeder advances tape and returns OK always
-
+#define FEEDER_DEFAULT_TYPE				0			// feeder type: 0 = 0816 servo style, 1 = bing v2 pulse
 
 /* ----------------
   Analog Reading Config
 */
 // ADC is polled regularly and scaled afterwards. When a command is issued, the pre-calculated values are sent to host immediately.
-#define ADC_READ_EVERY_MS 20
+#define ADC_READ_EVERY_MS 220
 
 // Scaling Factors to convert raw ADC value to real units.
 #define ANALOG_A0_SCALING_FACTOR 0.1277			//preset for NXP vacuum sensor, formula pressure [kPa]=(ADCval/1023-0.92)/0.007652

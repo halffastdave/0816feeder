@@ -15,6 +15,9 @@
 *   - improved setup sequence
 *   - default angle for 2mm feeds corrected according to math
 *
+*  added basic support for bing v2 feeder
+*
+*
 */
 
 #include "config.h"

@@ -36,6 +36,7 @@ class FeederClass {
 		int time_to_settle;
 		int motor_min_pulsewidth;
 		int motor_max_pulsewidth;
+		uint8_t feeder_type;  // add bing v2 support
 #ifdef HAS_FEEDBACKLINES  
 		uint8_t ignore_feedback;
 #endif
@@ -79,6 +80,7 @@ class FeederClass {
 		FEEDER_DEFAULT_TIME_TO_SETTLE,
 		FEEDER_DEFAULT_MOTOR_MIN_PULSEWIDTH,
 		FEEDER_DEFAULT_MOTOR_MAX_PULSEWITH,
+		FEEDER_DEFAULT_TYPE,
 #ifdef HAS_FEEDBACKLINES
 		FEEDER_DEFAULT_IGNORE_FEEDBACK,
 #endif

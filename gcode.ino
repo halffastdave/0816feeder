@@ -145,17 +145,27 @@ void processCommand() {
 			Serial.println();
 			#endif
 
-			//start feeding
-			bool triggerFeedOK=feeders[(uint8_t)signedFeederNo].advance(feedLength,overrideError);
-			if(!triggerFeedOK) {
-				//report error to host at once, tape was not advanced...
-				sendAnswer(1,F("feeder not OK (not activated, no tape or tension of cover tape not OK)"));
+			if (feeders[(uint8_t)signedFeederNo].feederSettings.feeder_type == 1) {
+				#ifdef DEBUG
+				Serial.print("Bing feeder, pin: ");
+				Serial.print(feederPinMap[signedFeederNo]);
+				Serial.println();
+				#endif
+				digitalWrite(feederPinMap[signedFeederNo], LOW);  // Motor control pin output high level                                               //Wait for 300ms
+				delay(10);
+				digitalWrite(feederPinMap[signedFeederNo], HIGH);   // Motor control pin output low level 
 			} else {
-				//answer OK to host in case there was no error -> NO, no answer now:
-				//wait to send OK, until feed process finished. otherwise the pickup is started immediately, thus too early.
-				//message is fired off in feeder.cpp
+				//start feeding
+				bool triggerFeedOK=feeders[(uint8_t)signedFeederNo].advance(feedLength,overrideError);
+				if(!triggerFeedOK) {
+					//report error to host at once, tape was not advanced...
+					sendAnswer(1,F("feeder not OK (not activated, no tape or tension of cover tape not OK)"));
+				} else {
+					//answer OK to host in case there was no error -> NO, no answer now:
+					//wait to send OK, until feed process finished. otherwise the pickup is started immediately, thus too early.
+					//message is fired off in feeder.cpp
+				}
 			}
-
 			
 			break;
 		}
@@ -245,6 +255,8 @@ void processCommand() {
 			updatedFeederSettings.time_to_settle=parseParameter('U',oldFeederSettings.time_to_settle);
 			updatedFeederSettings.motor_min_pulsewidth=parseParameter('V',oldFeederSettings.motor_min_pulsewidth);
 			updatedFeederSettings.motor_max_pulsewidth=parseParameter('W',oldFeederSettings.motor_max_pulsewidth);
+			updatedFeederSettings.feeder_type=parseParameter('T',oldFeederSettings.feeder_type);
+			
 #ifdef HAS_FEEDBACKLINES
 			updatedFeederSettings.ignore_feedback=parseParameter('X',oldFeederSettings.ignore_feedback);
 #endif
