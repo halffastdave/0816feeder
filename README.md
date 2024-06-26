@@ -6,5 +6,5 @@ This is the firmware needed to use the 0816 smt feeder. Find details on the feed
 
 [Watch a video showing the smt feeder in action](https://www.youtube.com/watch?v=vJzb3llKgjA)
 
-added additional config 'T' feeder_type for Bing Feeder v2 which accepts a pulse instead of pwm servo
+added additional config feeder_type 'T' for Bing Feeder v2 which accepts a pulse instead of pwm servo
 allows single controller to manage a mix of standard 0816 feeders and bing v2 feeders
