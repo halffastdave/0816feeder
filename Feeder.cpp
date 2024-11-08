@@ -60,6 +60,7 @@ void FeederClass::setup() {
 		Serial.println(feederNo);
 		
 		this->servo.attach(feederPinMap[this->feederNo],this->feederSettings.motor_min_pulsewidth,this->feederSettings.motor_max_pulsewidth);
+	
 	} else if (this->feederSettings.feeder_type == 1) {
 		Serial.print("Set pin for Bing ");
 		Serial.println(feederNo);
@@ -78,7 +79,9 @@ void FeederClass::setup() {
 #endif
 
 	//put on defined position
-	this->gotoRetractPosition();
+	if (this->feederSettings.feeder_type == 0) {
+		this->gotoRetractPosition();
+	}
 }
 
 FeederClass::sFeederSettings FeederClass::getSettings() {
@@ -429,6 +432,8 @@ void FeederClass::update() {
 					digitalWrite(feederPinMap[this->feederNo], HIGH);   // Motor control pin output low level 
 					this->feederPosition=sAT_RETRACT_POSITION;
 					this->feederState=sMOVING;
+					delay(60);
+					Serial.println("ok bing feeder advanced");
 				} else {
 				
 				}

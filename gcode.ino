@@ -154,6 +154,9 @@ void processCommand() {
 				digitalWrite(feederPinMap[signedFeederNo], LOW);  // Motor control pin output high level                                               //Wait for 300ms
 				delay(10);
 				digitalWrite(feederPinMap[signedFeederNo], HIGH);   // Motor control pin output low level 
+				delay(60);
+				Serial.print("ok bing feeder advanced: ");
+				Serial.println(signedFeederNo);
 			} else {
 				//start feeding
 				bool triggerFeedOK=feeders[(uint8_t)signedFeederNo].advance(feedLength,overrideError);
